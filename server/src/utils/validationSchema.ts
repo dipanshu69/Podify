@@ -1,3 +1,4 @@
+import { isValidObjectId } from "mongoose";
 import * as yup from "yup";
 
 const passwordRegExp =
@@ -13,6 +14,39 @@ export const CreateUserSchema = yup.object().shape({
   email: yup.string().required("Email is Required").email("Invalid Email"),
   password: yup
     .string()
+    .trim()
+    .required("Password Is Missing")
+    .min(8, "Password Is Too Short")
+    .matches(passwordRegExp, "Invalid password format"),
+});
+
+export const TokenAndIdValidation = yup.object().shape({
+  token: yup.string().trim().required("Invalid Token"),
+  userId: yup
+    .string()
+    .transform(function (value) {
+      if (this.isType(value) && isValidObjectId(value)) {
+        return value;
+      }
+      return "";
+    })
+    .required("Invalid userId"),
+});
+
+export const updatePasswordSchema = yup.object().shape({
+  token: yup.string().trim().required("Invalid Token"),
+  userId: yup
+    .string()
+    .transform(function (value) {
+      if (this.isType(value) && isValidObjectId(value)) {
+        return value;
+      }
+      return "";
+    })
+    .required("Invalid userId"),
+  password: yup
+    .string()
+    .trim()
     .required("Password Is Missing")
     .min(8, "Password Is Too Short")
     .matches(passwordRegExp, "Invalid password format"),
