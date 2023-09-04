@@ -51,3 +51,8 @@ export const updatePasswordSchema = yup.object().shape({
     .min(8, "Password Is Too Short")
     .matches(passwordRegExp, "Invalid password format"),
 });
+
+export const signInValidationSchema = yup.object({
+  email: yup.string().required("Email is Required").email("Invalid Email"),
+  password: yup.string().trim().required("Password Is Missing"),
+});

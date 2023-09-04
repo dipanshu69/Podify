@@ -11,8 +11,9 @@ import EmailVerificationToken from "#/models/emailVerification";
 import PasswordResetToken from "#/models/passwordResetToken";
 import { isValidObjectId } from "mongoose";
 import crypto from "crypto";
-import { PASSWORD_RESET_LINK } from "#/utils/variables";
+import { JWT_SECRET, PASSWORD_RESET_LINK } from "#/utils/variables";
 import passwordResetToken from "#/models/passwordResetToken";
+import jwt from "jsonwebtoken";
 
 /**
  * Create a new user.
@@ -129,8 +130,6 @@ export const grantValid: RequestHandler = async (req, res) => {
 export const updatePassWord: RequestHandler = async (req, res) => {
   const { password, userId } = req.body;
 
-  console.log("i am here");
-
   const user = await User.findById(userId);
   if (!user) return res.status(403).json({ error: "Invalid user" });
 
@@ -149,4 +148,37 @@ export const updatePassWord: RequestHandler = async (req, res) => {
   sendPassWordResetMail(user.name, user.email);
 
   res.status(200).json({ message: "Password Reset Successfully" });
+};
+
+export const signIn: RequestHandler = async (req, res) => {
+  const { password, email } = req.body;
+
+  const user = await User.findOne({
+    email: email,
+  });
+
+  if (!user) return res.status(403).json({ error: "Email/Password Mismatch" });
+
+  const matchPassWord = await user.comparePassword(password);
+
+  if (!matchPassWord) return res.status(403).json({ error: "Wrong Password" });
+
+  const token = jwt.sign({ userId: user._id }, JWT_SECRET);
+
+  user.tokens.push(token);
+
+  await user.save();
+
+  res.json({
+    profile: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      verified: user.verified,
+      avatar: user.avatar?.url,
+      followers: user.followers.length,
+      followings: user.followings.length,
+    },
+    token,
+  });
 };
