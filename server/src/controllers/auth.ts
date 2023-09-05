@@ -1,7 +1,7 @@
 import { CreateUser, VerifyEmailRequest } from "#/@types/user";
 import { RequestHandler } from "express";
 import User from "#/models/user";
-import { generateToken } from "#/utils/helper";
+import { formatProfile, generateToken } from "#/utils/helper";
 import {
   sendForgetPasswordLink,
   sendPassWordResetMail,
@@ -14,6 +14,9 @@ import crypto from "crypto";
 import { JWT_SECRET, PASSWORD_RESET_LINK } from "#/utils/variables";
 import passwordResetToken from "#/models/passwordResetToken";
 import jwt from "jsonwebtoken";
+import { RequestWithFiles } from "#/middleware/fileParser";
+import cloudinary from "#/cloud";
+import formidable from "formidable";
 
 /**
  * Create a new user.
@@ -181,4 +184,67 @@ export const signIn: RequestHandler = async (req, res) => {
     },
     token,
   });
+};
+
+export const updateProfile: RequestHandler = async (
+  req: RequestWithFiles,
+  res
+) => {
+  const { name } = req.body;
+  console.log(name);
+
+  const files = req.files?.avatar as formidable.File[];
+  const avatar = files[0];
+
+  const user = await User.findById(req.user.id);
+  if (!user) throw new Error("Something Went Wrong");
+
+  if (typeof name[0] !== "string")
+    return res.status(422).json({ error: "Invalid Name Format!" });
+
+  if (name[0].trim().length < 3)
+    return res.status(422).json({ error: "Invalid Name!" });
+
+  user.name = name[0];
+
+  if (avatar) {
+    if (user.avatar?.publicId) {
+      await cloudinary.uploader.destroy(user.avatar?.publicId);
+    }
+
+    const { secure_url, public_id } = await cloudinary.uploader.upload(
+      avatar.filepath,
+      {
+        width: 300,
+        height: 300,
+        crop: "thumb",
+        gravity: "face",
+      }
+    );
+
+    user.avatar = { url: secure_url, publicId: public_id };
+  }
+
+  await user.save();
+
+  res.json({ profile: formatProfile(user) });
+};
+
+export const sendProfile: RequestHandler = (req, res) => {
+  res.status(200).json({ profile: req.user });
+};
+
+export const logOut: RequestHandler = async (req, res) => {
+  const { fromAll } = req.query;
+
+  const token = req.token;
+
+  const user = await User.findById(req.user.id);
+  if (!user) throw new Error("Something Went Wrong, User Not Found");
+
+  if (fromAll === "yes") user.tokens = [];
+  else user.tokens = user.tokens.filter((item) => item !== token);
+
+  await user.save();
+  res.status(200).json({ success: true });
 };
