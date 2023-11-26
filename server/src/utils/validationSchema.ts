@@ -1,5 +1,6 @@
 import { isValidObjectId } from "mongoose";
 import * as yup from "yup";
+import { categories } from "./audio_category";
 
 const passwordRegExp =
   /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
@@ -52,7 +53,16 @@ export const updatePasswordSchema = yup.object().shape({
     .matches(passwordRegExp, "Invalid password format"),
 });
 
-export const signInValidationSchema = yup.object({
+export const signInValidationSchema = yup.object().shape({
   email: yup.string().required("Email is Required").email("Invalid Email"),
   password: yup.string().trim().required("Password Is Missing"),
+});
+
+export const AudioValidationSchema = yup.object().shape({
+  title: yup.string().required("Title Is Missing"),
+  about: yup.string().required("About Is Missing!"),
+  category: yup
+    .string()
+    .oneOf(categories, "Invalid Category!")
+    .required("Category Is Missing!"),
 });

@@ -1,4 +1,4 @@
-import { compare, hash } from "bcrypt";
+import { compare, hash } from "bcryptjs";
 import { Model, ObjectId, Schema, model } from "mongoose";
 
 export interface UserDocument {
