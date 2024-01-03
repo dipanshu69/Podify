@@ -1,4 +1,5 @@
 import { Model, ObjectId, Schema, model, models } from "mongoose";
+import { ref } from "yup";
 
 interface PlayListDocument {
   title: string;
@@ -20,9 +21,9 @@ const playListSchema = new Schema<PlayListDocument>(
     },
     items: [
       {
-        type: String,
+        type:Schema.Types.ObjectId,
         required: true,
-        ref: "Audio",
+        ref:"Audio"
       },
     ],
     visibility: {
