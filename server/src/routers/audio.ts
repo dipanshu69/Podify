@@ -1,4 +1,4 @@
-import { createAudio, upDateAudio } from "#/controllers/audio";
+import { createAudio, getLatestUploads, upDateAudio } from "#/controllers/audio";
 import { isVerified, mustAuth } from "#/middleware/auth";
 import fileParser from "#/middleware/fileParser";
 import { validate } from "#/middleware/validators";
@@ -24,5 +24,8 @@ router.patch(
   validate(AudioValidationSchema),
   upDateAudio
 );
+
+router.get("/latest", getLatestUploads);
+
 
 export default router;
