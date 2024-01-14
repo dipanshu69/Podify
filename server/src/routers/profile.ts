@@ -1,5 +1,5 @@
-import { getPublicPlayList, getPublicProfile, getPublicUploads, getUploads, updateFollower } from "#/controllers/profile";
-import { mustAuth } from "#/middleware/auth";
+import { getPublicPlayList, getPublicProfile, getPublicUploads, getRecommendedByProfile, getUploads, updateFollower } from "#/controllers/profile";
+import { isAuth, mustAuth } from "#/middleware/auth";
 import { Router } from "express";
 
 const router = Router();
@@ -9,6 +9,7 @@ router.get("/uploads", mustAuth, getUploads);
 router.get("/uploads/:profileId", getPublicUploads);
 router.get("/info/:profileId", getPublicProfile);
 router.get("/playList/:profileId", getPublicPlayList);
+router.get("/recommended", isAuth,  getRecommendedByProfile)
 
 
 
