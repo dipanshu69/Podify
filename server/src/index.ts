@@ -7,6 +7,7 @@ import favorite from "./routers/favorite";
 import playList from "./routers/playList";
 import profile from "./routers/profile";
 import history from "./routers/history";
+import "./utils/schedule";
 
 
 

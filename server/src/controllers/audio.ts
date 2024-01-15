@@ -128,28 +128,3 @@ export const getLatestUploads: RequestHandler = async (req, res) => {
   res.json({ audios });
 };
 
-export const testFunction: RequestHandler = async (req, res) => {
-  const result = await Audio.aggregate([
-    { $sort: { likes: -1 } },
-    {
-      $group: {
-        _id: "$category",
-        audios:{$push:"$$ROOT._id"}
-      },
-    },
-    {
-      $limit:20,
-    },
-  ]);
-
-
-  result.map(async (item) => {
-    await AutoPlaylist.updateOne(
-      {title:item._id},
-      {$set: {items: item.audios}},
-      {upsert:true}
-    )
-  })
-
-  res.json({ result });
-};
