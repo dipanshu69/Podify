@@ -1,5 +1,6 @@
 import express from "express";
 import "dotenv/config";
+import "express-async-errors";
 import "./db";
 import authRouter from "./routers/auth";
 import audioRouter from "./routers/audio";
@@ -8,11 +9,11 @@ import playList from "./routers/playList";
 import profile from "./routers/profile";
 import history from "./routers/history";
 import "./utils/schedule";
-
-
+import { errorHandler } from "./middleware/error";
 
 const app = express();
 
+app.use(errorHandler);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("src/public"));

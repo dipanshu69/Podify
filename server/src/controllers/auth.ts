@@ -29,6 +29,11 @@ import formidable from "formidable";
 export const create: RequestHandler = async (req: CreateUser, res) => {
   const { name, email, password } = req.body;
 
+  const oldUser = await User.findOne({ email });
+  if (oldUser) {
+    return res.status(403).json({ error: "Email is already In Use!" });
+  }
+
   const token = generateToken(6);
   const user = await User.create({ name, email, password });
 
@@ -81,6 +86,11 @@ export const sendReVerificationToken: RequestHandler = async (req, res) => {
 
   const user = await User.findById(userId);
   if (!user) return res.status(403).json({ error: "Invalid Request" });
+
+  if (user.verified)
+    return res
+      .status(422)
+      .json({ error: " Your Account Is Already Verified!" });
 
   EmailVerificationToken.findOneAndDelete({
     owner: userId,
@@ -193,19 +203,19 @@ export const updateProfile: RequestHandler = async (
   const { name } = req.body;
   console.log(name);
 
-  const files = req.files?.avatar as formidable.File[];
-  const avatar = files[0];
+  const avatar = req.files?.avatar as formidable.File;
+  // const avatar = files[0];
 
   const user = await User.findById(req.user.id);
   if (!user) throw new Error("Something Went Wrong");
 
-  if (typeof name[0] !== "string")
+  if (typeof name !== "string")
     return res.status(422).json({ error: "Invalid Name Format!" });
 
-  if (name[0].trim().length < 3)
+  if (name.trim().length < 3)
     return res.status(422).json({ error: "Invalid Name!" });
 
-  user.name = name[0];
+  user.name = name;
 
   if (avatar) {
     if (user.avatar?.publicId) {
