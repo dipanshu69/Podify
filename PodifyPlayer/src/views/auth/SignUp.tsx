@@ -5,6 +5,7 @@ import React, {FC} from 'react';
 import {SafeAreaView, StyleSheet, View} from 'react-native';
 import * as yup from 'yup';
 import SubmitBtn from '@components/form/SubmitBtn';
+import Icon from 'react-native-vector-icons/Entypo';
 
 interface Props {}
 
@@ -52,6 +53,7 @@ const SignUp: FC<Props> = () => {
             label="Name"
             containerStyle={styles.marginBottom}
           />
+
           <AuthInputField
             name="email"
             placeholder="John@email.com"
@@ -60,12 +62,15 @@ const SignUp: FC<Props> = () => {
             autoCapitalize="none"
             containerStyle={styles.marginBottom}
           />
+
           <AuthInputField
             name="password"
             placeholder="********"
             label="Password"
             autoCapitalize="none"
             secureTextEntry
+            containerStyle={styles.marginBottom}
+            rightIcon={<Icon name="eye" size={26} color="white" />}
           />
           <SubmitBtn title="SignUp" />
         </View>

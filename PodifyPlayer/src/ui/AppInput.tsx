@@ -10,6 +10,7 @@ const AppInput: FC<Props> = props => {
       {...props}
       placeholderTextColor={colors.INACTIVE_CONTRAST}
       style={styles.input}
+      autoFocus={true}
     />
   );
 };
