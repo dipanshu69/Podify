@@ -14,9 +14,9 @@ import {
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSequence,
   withSpring,
   withTiming,
+  withSequence,
 } from 'react-native-reanimated';
 
 interface Props {
@@ -73,6 +73,7 @@ const AuthInputField: FC<Props> = props => {
     if (errorMsg) {
       shakeUI();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errorMsg]);
 
   return (

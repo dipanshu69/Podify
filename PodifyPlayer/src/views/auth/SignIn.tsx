@@ -1,22 +1,14 @@
-/* eslint-disable react-native/no-inline-styles */
-import AuthInputField from '@components/form/AuthInputField';
+import AuthFormContainer from '@components/AuthFormContainer';
 import Form from '@components/form';
+import AuthInputField from '@components/form/AuthInputField';
+import SubmitBtn from '@components/form/SubmitBtn';
+import AppLink from '@ui/AppLink';
+import PassWordVisiblityIcon from '@ui/PassWordVisiblityIcon';
 import React, {FC, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import * as yup from 'yup';
-import SubmitBtn from '@components/form/SubmitBtn';
-import PassWordVisiblityIcon from '@ui/PassWordVisiblityIcon';
-import AppLink from '@ui/AppLink';
-import AuthFormContainer from '@components/AuthFormContainer';
 
-interface Props {}
-
-const signUpSchema = yup.object({
-  name: yup
-    .string()
-    .trim('Name Is Missing')
-    .min(3, 'Invalid Name')
-    .required('Name Is Required'),
+const LogInSchema = yup.object({
   email: yup
     .string()
     .trim('Email Is Missing')
@@ -26,20 +18,18 @@ const signUpSchema = yup.object({
     .string()
     .trim('Password Is Missing')
     .min(8, 'Password Is Too Short!')
-    .matches(
-      /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#\$%\^&\*])[a-zA-Z\d!@#\$%\^&\*]+$/,
-      'Password Is Too Simple',
-    )
     .required('Password Is Required'),
 });
 
+interface Props {}
+
 const initialValues = {
-  name: '',
   email: '',
   password: '',
 };
 
-const SignUp: FC<Props> = () => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SignIn: FC<Props> = props => {
   const [secureEntry, setSecureEntry] = useState(true);
 
   return (
@@ -48,18 +38,9 @@ const SignUp: FC<Props> = () => {
         console.log(values);
       }}
       initialValues={initialValues}
-      validationSchema={signUpSchema}>
-      <AuthFormContainer
-        title="Welcome"
-        subTitle="Lets's Get Started By creating Account">
+      validationSchema={LogInSchema}>
+      <AuthFormContainer title="Welcome Back">
         <View style={styles.formContainer}>
-          <AuthInputField
-            name="name"
-            placeholder="John Doe"
-            label="Name"
-            containerStyle={styles.marginBottom}
-          />
-
           <AuthInputField
             name="email"
             placeholder="John@email.com"
@@ -68,7 +49,6 @@ const SignUp: FC<Props> = () => {
             autoCapitalize="none"
             containerStyle={styles.marginBottom}
           />
-
           <AuthInputField
             name="password"
             placeholder="********"
@@ -79,10 +59,10 @@ const SignUp: FC<Props> = () => {
             rightIcon={<PassWordVisiblityIcon privateIcon={secureEntry} />}
             onRightIconPress={() => setSecureEntry(!secureEntry)}
           />
-          <SubmitBtn title="SignUp" />
+          <SubmitBtn title="Log In" />
           <View style={styles.appLinkContainer}>
             <AppLink title="forget Password" />
-            <AppLink title="Log In" />
+            <AppLink title="Register" />
           </View>
         </View>
       </AuthFormContainer>
@@ -105,4 +85,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignUp;
+export default SignIn;
