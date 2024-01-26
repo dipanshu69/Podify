@@ -1,17 +1,17 @@
 /* eslint-disable react-native/no-inline-styles */
-import AuthInputField from '@components/form/AuthInputField';
-import Form from '@components/form';
-import React, {FC, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
-import * as yup from 'yup';
-import SubmitBtn from '@components/form/SubmitBtn';
-import PassWordVisiblityIcon from '@ui/PassWordVisibilityIcon';
-import AppLink from '@ui/AppLink';
-import AuthFormContainer from '@components/AuthFormContainer';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {AuthStackParamList} from 'src/@Types/navigation';
-import {FormikHelpers} from 'formik';
-import axios from 'axios';
+import AuthInputField from "@components/form/AuthInputField";
+import Form from "@components/form";
+import React, { FC, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import * as yup from "yup";
+import SubmitBtn from "@components/form/SubmitBtn";
+import PassWordVisibilityIcon from "@ui/PassWordVisibilityIcon";
+import AppLink from "@ui/AppLink";
+import AuthFormContainer from "@components/AuthFormContainer";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { AuthStackParamList } from "src/@Types/navigation";
+import { FormikHelpers } from "formik";
+import client from "src/api/client";
 
 interface Props {}
 
@@ -21,33 +21,35 @@ interface NewUser {
   password: string;
 }
 
+const initialValues = {
+  name: "",
+  email: "",
+  password: "",
+};
+
 const signUpSchema = yup.object({
   name: yup
     .string()
-    .trim('Name Is Missing')
-    .min(3, 'Invalid Name')
-    .required('Name Is Required'),
+    .trim("Name Is Missing")
+    .min(3, "Invalid Name")
+    .required("Name Is Required"),
   email: yup
     .string()
-    .trim('Email Is Missing')
-    .email('Invalid Email')
-    .required('Email Is Required'),
+    .trim("Email Is Missing")
+    .email("Invalid Email")
+    .required("Email Is Required"),
   password: yup
     .string()
-    .trim('Password Is Missing')
-    .min(8, 'Password Is Too Short!')
+    .trim("Password Is Missing")
+    .min(8, "Password Is Too Short!")
     .matches(
       /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#\$%\^&\*])[a-zA-Z\d!@#\$%\^&\*]+$/,
-      'Password Is Too Simple',
+      "Password Is Too Simple"
     )
-    .required('Password Is Required'),
+    .required("Password Is Required"),
 });
 
-const initialValues = {
-  name: '',
-  email: '',
-  password: '',
-};
+
 
 const SignUp: FC<Props> = () => {
   const [secureEntry, setSecureEntry] = useState(true);
@@ -55,14 +57,18 @@ const SignUp: FC<Props> = () => {
 
   const handleSubmit = async (
     values: NewUser,
-    actions: FormikHelpers<NewUser>,
+    actions: FormikHelpers<NewUser>
   ) => {
     try {
-      const res = await axios.post('http://192.168.1.16:8998/auth/create', {
-        ...values,
-      });
+      const { data } = await client.post("/auth/create",
+        {
+          ...values,
+        }
+      );
+      console.log(data);
+      navigation.navigate("Verification", { userInfo: data.user });
     } catch (err) {
-      console.log(err);
+      console.log('Sign Up Error' , err);
     }
   };
 
@@ -70,10 +76,12 @@ const SignUp: FC<Props> = () => {
     <Form
       onSubmit={handleSubmit}
       initialValues={initialValues}
-      validationSchema={signUpSchema}>
+      validationSchema={signUpSchema}
+    >
       <AuthFormContainer
         title="Welcome"
-        subTitle="Lets's Get Started By creating Account">
+        subTitle="Lets's Get Started By creating Account"
+      >
         <View style={styles.formContainer}>
           <AuthInputField
             name="name"
@@ -98,7 +106,7 @@ const SignUp: FC<Props> = () => {
             autoCapitalize="none"
             secureTextEntry={secureEntry}
             containerStyle={styles.marginBottom}
-            rightIcon={<PassWordVisiblityIcon privateIcon={secureEntry} />}
+            rightIcon={<PassWordVisibilityIcon privateIcon={secureEntry} />}
             onRightIconPress={() => setSecureEntry(!secureEntry)}
           />
           <SubmitBtn title="SignUp" />
@@ -106,13 +114,13 @@ const SignUp: FC<Props> = () => {
             <AppLink
               title="forget Password"
               onPress={() => {
-                navigation.navigate('LostPassWord');
+                navigation.navigate("LostPassWord");
               }}
             />
             <AppLink
               title="Log In"
               onPress={() => {
-                navigation.navigate('SignIn');
+                navigation.navigate("SignIn");
               }}
             />
           </View>
@@ -124,17 +132,18 @@ const SignUp: FC<Props> = () => {
 
 const styles = StyleSheet.create({
   formContainer: {
-    width: '100%',
+    width: "100%",
   },
   marginBottom: {
     marginBottom: 20,
   },
   appLinkContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 20,
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });
 
 export default SignUp;
+
