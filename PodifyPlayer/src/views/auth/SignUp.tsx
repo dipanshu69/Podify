@@ -5,11 +5,21 @@ import React, {FC, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import * as yup from 'yup';
 import SubmitBtn from '@components/form/SubmitBtn';
-import PassWordVisiblityIcon from '@ui/PassWordVisiblityIcon';
+import PassWordVisiblityIcon from '@ui/PassWordVisibilityIcon';
 import AppLink from '@ui/AppLink';
 import AuthFormContainer from '@components/AuthFormContainer';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {AuthStackParamList} from 'src/@Types/navigation';
+import {FormikHelpers} from 'formik';
+import axios from 'axios';
 
 interface Props {}
+
+interface NewUser {
+  name: string;
+  email: string;
+  password: string;
+}
 
 const signUpSchema = yup.object({
   name: yup
@@ -41,12 +51,24 @@ const initialValues = {
 
 const SignUp: FC<Props> = () => {
   const [secureEntry, setSecureEntry] = useState(true);
+  const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
+
+  const handleSubmit = async (
+    values: NewUser,
+    actions: FormikHelpers<NewUser>,
+  ) => {
+    try {
+      const res = await axios.post('http://192.168.1.16:8998/auth/create', {
+        ...values,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <Form
-      onSubmit={values => {
-        console.log(values);
-      }}
+      onSubmit={handleSubmit}
       initialValues={initialValues}
       validationSchema={signUpSchema}>
       <AuthFormContainer
@@ -81,8 +103,18 @@ const SignUp: FC<Props> = () => {
           />
           <SubmitBtn title="SignUp" />
           <View style={styles.appLinkContainer}>
-            <AppLink title="forget Password" />
-            <AppLink title="Log In" />
+            <AppLink
+              title="forget Password"
+              onPress={() => {
+                navigation.navigate('LostPassWord');
+              }}
+            />
+            <AppLink
+              title="Log In"
+              onPress={() => {
+                navigation.navigate('SignIn');
+              }}
+            />
           </View>
         </View>
       </AuthFormContainer>

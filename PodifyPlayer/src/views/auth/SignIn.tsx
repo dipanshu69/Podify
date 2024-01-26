@@ -2,10 +2,12 @@ import AuthFormContainer from '@components/AuthFormContainer';
 import Form from '@components/form';
 import AuthInputField from '@components/form/AuthInputField';
 import SubmitBtn from '@components/form/SubmitBtn';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import AppLink from '@ui/AppLink';
-import PassWordVisiblityIcon from '@ui/PassWordVisiblityIcon';
+import PassWordVisibilityIcon from '@ui/PassWordVisibilityIcon';
 import React, {FC, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
+import {AuthStackParamList} from 'src/@Types/navigation';
 import * as yup from 'yup';
 
 const LogInSchema = yup.object({
@@ -31,6 +33,7 @@ const initialValues = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SignIn: FC<Props> = props => {
   const [secureEntry, setSecureEntry] = useState(true);
+  const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
 
   return (
     <Form
@@ -56,13 +59,23 @@ const SignIn: FC<Props> = props => {
             autoCapitalize="none"
             secureTextEntry={secureEntry}
             containerStyle={styles.marginBottom}
-            rightIcon={<PassWordVisiblityIcon privateIcon={secureEntry} />}
+            rightIcon={<PassWordVisibilityIcon privateIcon={secureEntry} />}
             onRightIconPress={() => setSecureEntry(!secureEntry)}
           />
           <SubmitBtn title="Log In" />
           <View style={styles.appLinkContainer}>
-            <AppLink title="forget Password" />
-            <AppLink title="Register" />
+            <AppLink
+              title="forget Password"
+              onPress={() => {
+                navigation.navigate('LostPassWord');
+              }}
+            />
+            <AppLink
+              title="Register"
+              onPress={() => {
+                navigation.navigate('SignUp');
+              }}
+            />
           </View>
         </View>
       </AuthFormContainer>

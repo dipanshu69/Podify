@@ -6,7 +6,7 @@ interface Props {
   privateIcon: boolean;
 }
 
-const PassWordVisiblityIcon: FC<Props> = ({privateIcon}) => {
+const PassWordVisibilityIcon: FC<Props> = ({privateIcon}) => {
   return privateIcon ? (
     <Icon name="eye" size={26} color={colors.SECONDARY} />
   ) : (
@@ -14,4 +14,4 @@ const PassWordVisiblityIcon: FC<Props> = ({privateIcon}) => {
   );
 };
 
-export default PassWordVisiblityIcon;
+export default PassWordVisibilityIcon;

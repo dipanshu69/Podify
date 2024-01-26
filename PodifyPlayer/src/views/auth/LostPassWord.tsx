@@ -2,9 +2,11 @@ import AuthFormContainer from '@components/AuthFormContainer';
 import Form from '@components/form';
 import AuthInputField from '@components/form/AuthInputField';
 import SubmitBtn from '@components/form/SubmitBtn';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import AppLink from '@ui/AppLink';
 import React, {FC} from 'react';
 import {StyleSheet, View} from 'react-native';
+import {AuthStackParamList} from 'src/@Types/navigation';
 import * as yup from 'yup';
 
 const LogInSchema = yup.object({
@@ -23,6 +25,8 @@ const initialValues = {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LostPassWord: FC<Props> = props => {
+  const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
+
   return (
     <Form
       onSubmit={values => {
@@ -44,8 +48,18 @@ const LostPassWord: FC<Props> = props => {
           />
           <SubmitBtn title="Send Link" />
           <View style={styles.appLinkContainer}>
-            <AppLink title="Sign In" />
-            <AppLink title="Register" />
+            <AppLink
+              title="Sign In"
+              onPress={() => {
+                navigation.navigate('SignIn');
+              }}
+            />
+            <AppLink
+              title="Register"
+              onPress={() => {
+                navigation.navigate('SignUp');
+              }}
+            />
           </View>
         </View>
       </AuthFormContainer>
