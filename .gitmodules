@@ -1,0 +1,3 @@
+[submodule "ExpoPodifyPlayer"]
+	path = ExpoPodifyPlayer
+	url = git@github.com:dipanshu69/Podify.git
