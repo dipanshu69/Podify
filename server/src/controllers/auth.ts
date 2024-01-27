@@ -82,9 +82,10 @@ export const sendReVerificationToken: RequestHandler = async (req, res) => {
   const { userId } = req.body;
 
   if (!isValidObjectId(userId))
-    return res.status(403).json({ error: "Invalid Request" });
+    return res.status(403).json({ error: "UserId Is Invalid" });
 
   const user = await User.findById(userId);
+  console.log(user);
   if (!user) return res.status(403).json({ error: "Invalid Request" });
 
   if (user.verified)
@@ -92,14 +93,14 @@ export const sendReVerificationToken: RequestHandler = async (req, res) => {
       .status(422)
       .json({ error: " Your Account Is Already Verified!" });
 
-  EmailVerificationToken.findOneAndDelete({
-    owner: userId,
+  await EmailVerificationToken.findOneAndDelete({
+    owner: user._id,
   });
 
   const token = generateToken(6);
 
   await EmailVerificationToken.create({
-    owner: userId,
+    owner: user._id,
     token,
   });
 
@@ -129,7 +130,7 @@ export const generateForgetPassWord: RequestHandler = async (req, res) => {
     token,
   });
 
-  const resetLink = `${PASSWORD_RESET_LINK}?token=${token}$userId=${user._id}`;
+  const resetLink = `${PASSWORD_RESET_LINK}?token=${token}&userId=${user._id}`;
 
   sendForgetPasswordLink({ email: user.email, link: resetLink });
 
