@@ -5,9 +5,14 @@ import SubmitBtn from '@components/form/SubmitBtn';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import AppLink from '@ui/AppLink';
 import PassWordVisibilityIcon from '@ui/PassWordVisibilityIcon';
+import {Keys, saveToAsyncStorage} from '@utils/asyncStorage';
+import {FormikHelpers} from 'formik';
 import React, {FC, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
+import {useDispatch} from 'react-redux';
 import {AuthStackParamList} from 'src/@Types/navigation';
+import client from 'src/api/client';
+import {updateLoggedInState, updateProfile} from 'src/store/auth';
 import * as yup from 'yup';
 
 const LogInSchema = yup.object({
@@ -25,6 +30,11 @@ const LogInSchema = yup.object({
 
 interface Props {}
 
+interface User {
+  email: string;
+  password: string;
+}
+
 const initialValues = {
   email: '',
   password: '',
@@ -34,12 +44,27 @@ const initialValues = {
 const SignIn: FC<Props> = props => {
   const [secureEntry, setSecureEntry] = useState(true);
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (values: User, actions: FormikHelpers<User>) => {
+    actions.setSubmitting(true);
+    try {
+      const {data} = await client.post('auth/sign-in', {
+        ...values,
+      });
+      console.log('SignIn', data);
+      await saveToAsyncStorage(Keys.AUTH_TOKEN, data.token);
+      dispatch(updateProfile(data.profile));
+      dispatch(updateLoggedInState(true));
+    } catch (error) {
+      console.log('Lodged In Failed', error);
+    }
+    actions.setSubmitting(false);
+  };
 
   return (
     <Form
-      onSubmit={values => {
-        console.log(values);
-      }}
+      onSubmit={handleSubmit}
       initialValues={initialValues}
       validationSchema={LogInSchema}>
       <AuthFormContainer title="Welcome Back">

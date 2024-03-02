@@ -1,13 +1,21 @@
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import AuthNavigator from 'src/navigation/AuthNavigator';
+import {Provider} from 'react-redux';
+import store from 'src/store';
+import AppNavigator from 'src/navigation';
+import Appcontainer from '@components/Appcontainer';
+import {StatusBar} from 'react-native';
+import colors from '@utils/colors';
 
-const App = () => {
+export default function App() {
   return (
-    <NavigationContainer>
-      <AuthNavigator />
-    </NavigationContainer>
+    <Provider store={store}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={colors.PRIMARY} // Set the background color to match tabBarStyle
+      />
+      <Appcontainer>
+        <AppNavigator />
+      </Appcontainer>
+    </Provider>
   );
-};
-
-export default App;
+}

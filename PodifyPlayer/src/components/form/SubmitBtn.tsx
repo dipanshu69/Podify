@@ -8,9 +8,15 @@ interface Props {
 }
 
 const SubmitBtn: FC<Props> = props => {
-  const {handleSubmit} = useFormikContext();
+  const {handleSubmit, isSubmitting} = useFormikContext();
 
-  return <AppButton title={props.title} onPress={() => handleSubmit()} />;
+  return (
+    <AppButton
+      title={props.title}
+      onPress={() => handleSubmit()}
+      loading={isSubmitting}
+    />
+  );
 };
 
 export default SubmitBtn;
