@@ -1,8 +1,14 @@
-import {configureStore} from '@reduxjs/toolkit';
+import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import authReducers from './auth';
+import notificationReducer from './notification';
+
+const reducer = combineReducers({
+  auth: authReducers,
+  notification: notificationReducer,
+});
 
 const store = configureStore({
-  reducer: authReducers,
+  reducer,
 });
 
 export type RootState = ReturnType<typeof store.getState>;

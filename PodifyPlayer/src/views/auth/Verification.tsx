@@ -6,8 +6,11 @@ import AppLink from '@ui/AppLink';
 import OtpFelid from '@ui/OtpFelid';
 import React, {FC, useEffect, useRef, useState} from 'react';
 import {Keyboard, StyleSheet, TextInput, View} from 'react-native';
+import {useDispatch} from 'react-redux';
 import {AuthStackParamList} from 'src/@Types/navigation';
+import {catchAsyncError} from 'src/api/catchError';
 import client from 'src/api/client';
+import {updateNotification} from 'src/store/notification';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Verification'>;
 
@@ -17,8 +20,10 @@ const otpFields = new Array(6).fill('');
 const Verification: FC<Props> = ({route}) => {
   const [otp, setOtp] = useState([...otpFields]);
   const [activeOtpIndex, setActiveOtpIndex] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
+  const dispatch = useDispatch();
 
   const {userInfo} = route.params;
 
@@ -54,18 +59,25 @@ const Verification: FC<Props> = ({route}) => {
   });
 
   const handleSubmit = async () => {
-    if (!isValidOtp) return;
-
+    if (!isValidOtp) {
+      return dispatch(
+        updateNotification({message: 'Invalid OTP', type: 'error'}),
+      );
+    }
+    setSubmitting(true);
     try {
       const {data} = await client.post('/auth/verify-email', {
         token: otp.join(''),
         userId: userInfo.id,
       });
+      dispatch(updateNotification({message: data.message, type: 'success'}));
       navigation.navigate('SignIn');
-      console.log(data);
     } catch (err) {
-      console.log('Verification Failed', err);
+      const error = catchAsyncError(err);
+      dispatch(updateNotification({message: error, type: 'error'}));
+      console.log('Sign Up Error', err);
     }
+    setSubmitting(false);
   };
 
   return (
@@ -87,7 +99,7 @@ const Verification: FC<Props> = ({route}) => {
           );
         })}
       </View>
-      <AppButton title="Submit" onPress={handleSubmit} />
+      <AppButton loading={submitting} title="Submit" onPress={handleSubmit} />
       <View style={styles.appLinkContainer}>
         <AppLink title="Re-Send OTP" />
       </View>

@@ -1,9 +1,11 @@
 import CategorySelector from '@components/CategorySelector';
 import FileSelector from '@components/FileSelector';
 import AppButton from '@ui/AppButton';
+import Progress from '@ui/Progress';
 import {categories} from '@utils/Category';
 import {Keys, getFromAsyncStorage} from '@utils/asyncStorage';
 import colors from '@utils/colors';
+import {mapRange} from '@utils/math';
 import React, {FC, useState} from 'react';
 import {
   Pressable,
@@ -15,7 +17,10 @@ import {
 } from 'react-native';
 import {types, DocumentPickerResponse} from 'react-native-document-picker';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useDispatch} from 'react-redux';
+import {catchAsyncError} from 'src/api/catchError';
 import client from 'src/api/client';
+import {updateNotification} from 'src/store/notification';
 import * as yup from 'yup';
 
 interface FormFields {
@@ -30,6 +35,8 @@ const defaultForm: FormFields = {
   title: '',
   category: '',
   about: '',
+  file: undefined,
+  poster: undefined,
 };
 
 const audioInfoSchema = yup.object().shape({
@@ -50,11 +57,15 @@ const audioInfoSchema = yup.object().shape({
   }),
 });
 
-const Upload: FC<Props> = props => {
+const Upload: FC<Props> = _props => {
   const [showCategoryModal, setShowCategoryModal] = useState<boolean>(false);
   const [audioInfo, setAudioInfo] = useState({...defaultForm});
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const handleUpload = async () => {
+    setLoading(true);
     try {
       const finalData = await audioInfoSchema.validate(audioInfo);
 
@@ -87,20 +98,30 @@ const Upload: FC<Props> = props => {
           Authorization: 'Bearer ' + token,
           'Content-Type': 'multipart/form-data;',
         },
+        onUploadProgress(progressEvent) {
+          const uploaded = mapRange({
+            inputMin: 0,
+            inputMax: progressEvent.total || 0,
+            outputMax: 100,
+            outputMin: 0,
+            inputValue: progressEvent.loaded,
+          });
+
+          if (uploaded >= 100) {
+            setAudioInfo({...defaultForm});
+            setLoading(false);
+          }
+          setUploadProgress(Math.floor(uploaded));
+        },
       });
 
       console.log(data);
-    } catch (error: any) {
-      if (error instanceof yup.ValidationError) {
-        console.log(error);
-      }
-      console.log(
-        'Status Code:',
-        error.response.status,
-        'Data:',
-        error.response.data,
-      );
+    } catch (err: any) {
+      const error = catchAsyncError(err);
+      dispatch(updateNotification({message: error, type: 'error'}));
+      console.log('Sign Up Error', err);
     }
+    setLoading(false);
   };
 
   return (
@@ -144,6 +165,7 @@ const Upload: FC<Props> = props => {
           onChangeText={text => {
             setAudioInfo({...audioInfo, title: text});
           }}
+          value={audioInfo.title}
         />
         <Pressable
           onPress={() => {
@@ -162,6 +184,7 @@ const Upload: FC<Props> = props => {
           onChangeText={text => {
             setAudioInfo({...audioInfo, about: text});
           }}
+          value={audioInfo.about}
         />
         <CategorySelector
           visible={showCategoryModal}
@@ -175,8 +198,10 @@ const Upload: FC<Props> = props => {
             setAudioInfo({...audioInfo, category: item});
           }}
         />
-        <View style={{marginBottom: 20}} />
-        <AppButton title="Submit" onPress={handleUpload} />
+        <View style={{marginVertical: 20}}>
+          {loading ? <Progress progress={uploadProgress} /> : null}
+        </View>
+        <AppButton loading={loading} title="Submit" onPress={handleUpload} />
       </View>
     </ScrollView>
   );

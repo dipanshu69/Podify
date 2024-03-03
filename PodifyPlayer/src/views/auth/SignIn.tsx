@@ -11,8 +11,10 @@ import React, {FC, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {AuthStackParamList} from 'src/@Types/navigation';
+import {catchAsyncError} from 'src/api/catchError';
 import client from 'src/api/client';
 import {updateLoggedInState, updateProfile} from 'src/store/auth';
+import {updateNotification} from 'src/store/notification';
 import * as yup from 'yup';
 
 const LogInSchema = yup.object({
@@ -56,8 +58,10 @@ const SignIn: FC<Props> = props => {
       await saveToAsyncStorage(Keys.AUTH_TOKEN, data.token);
       dispatch(updateProfile(data.profile));
       dispatch(updateLoggedInState(true));
-    } catch (error) {
-      console.log('Lodged In Failed', error);
+    } catch (err) {
+      const error = catchAsyncError(err);
+      dispatch(updateNotification({message: error, type: 'error'}));
+      console.log('Sign Up Error', err);
     }
     actions.setSubmitting(false);
   };

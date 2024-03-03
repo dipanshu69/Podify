@@ -7,8 +7,11 @@ import AppLink from '@ui/AppLink';
 import {FormikHelpers} from 'formik';
 import React, {FC} from 'react';
 import {StyleSheet, View} from 'react-native';
+import {useDispatch} from 'react-redux';
 import {AuthStackParamList} from 'src/@Types/navigation';
+import {catchAsyncError} from 'src/api/catchError';
 import client from 'src/api/client';
+import {updateNotification} from 'src/store/notification';
 import * as yup from 'yup';
 
 const LogInSchema = yup.object({
@@ -32,6 +35,7 @@ const initialValues = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LostPassWord: FC<Props> = props => {
   const navigation = useNavigation<NavigationProp<AuthStackParamList>>();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (
     value: initialValues,
@@ -43,8 +47,10 @@ const LostPassWord: FC<Props> = props => {
         ...value,
       });
       console.log('LostPassword', data);
-    } catch (error) {
-      console.log('ForgetPasswordError', error);
+    } catch (err) {
+      const error = catchAsyncError(err);
+      dispatch(updateNotification({message: error, type: 'error'}));
+      console.log('Sign Up Error', err);
     }
     actions.setSubmitting(false);
   };
